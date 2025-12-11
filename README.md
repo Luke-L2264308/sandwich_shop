@@ -182,3 +182,4 @@ Please follow existing code style and run `flutter analyze` before opening PR.
 ## Contact
 
 Project maintained by the repository owner. For questions or issues, open an issue in the repository or contact the maintainer via the project hosting platform.
+

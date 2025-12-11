@@ -128,4 +128,58 @@ Allow users to modify items in their cart (quantity, options, remove, save for l
 
 --- 
 
-If you want, I can convert this into issue templates and generate example provider and widget scaffolds (file paths and method signatures) next.
+## Profile Screen — Requirements & AI Prompt
+
+### Feature Purpose
+Add a Profile screen where users can view and edit simple account details (display name, email, phone, shipping address). This is a lightweight local UI only (no real auth or backend required yet) and must be reachable from the bottom of the Order/Cart screen. Include validation, accessible controls, immediate UI feedback, and widget tests. Persisting data may be mocked (in-memory or simple local mock) to enable UI tests.
+
+### Subtasks
+- Subtask 1 — Profile Screen UI
+  - Fields: Display name (required), Email (required, validate format), Phone (optional, validate digits), Address (multiline, optional).
+  - Actions: Save (applies changes to local profile model / mock provider and shows success Snackbar), Cancel (revert edits), Edit mode toggle (view vs edit).
+  - Accessibility: semantic labels for all inputs and buttons; minimum touch sizes.
+  - File: lib/views/profile_screen.dart
+
+- Subtask 2 — Navigation Link
+  - Add a small link/button at the bottom of the order/cart screen labeled "Profile" that pushes the Profile screen.
+  - File change: lib/views/cart_screen.dart — append link/button to the bottom area.
+
+- Subtask 3 — Local Mock Persistence & Provider
+  - Implement simple profile provider (lib/providers/profile_provider.dart) or extend existing provider pattern to store profile in memory with Future.delayed to simulate async save/load.
+  - Methods: Future<Profile> loadProfile(), Future<void> saveProfile(Profile).
+  - Optimistic UI not required but keep API consistent with cart provider style for future integration.
+
+- Subtask 4 — Tests
+  - Widget tests: test/widget/profile_screen_test.dart
+    - Verify initial view mode displays profile fields.
+    - Tap Edit -> update fields -> Tap Save -> shows success Snackbar and persists to mock provider.
+    - Validation tests: invalid email shows inline error and prevents save.
+    - Accessibility: inputs have semantic labels; buttons tappable.
+  - Unit tests for provider: test/provider/profile_provider_test.dart (load/save behavior, simulated delay).
+
+### Acceptance Criteria
+- Profile screen reachable from Cart/Order screen bottom link.
+- Fields validate (email format, required name/email).
+- Save shows success Snackbar; mock provider receives updated Profile.
+- Widget tests present and passing.
+- All interactive controls include semantic labels and minimum touch sizes.
+
+### Manual QA Checklist (brief)
+- Open Cart -> tap Profile link -> Profile screen opens.
+- Edit name/email/phone/address; invalid email blocks save and shows error.
+- Save shows Snackbar and returns to view mode showing updated values.
+- Re-open screen loads persisted mock values.
+
+### AI Assistant Prompt (for implementation)
+```text
+You are building a Flutter Profile screen for the Sandwich Shop app (no real auth needed). Implement a new screen at lib/views/profile_screen.dart that allows viewing and editing a simple user profile with these fields: displayName (required), email (required, valid email), phone (optional, digits only), address (optional, multiline). Provide an Edit toggle that switches between view and edit modes, a Save button that validates input and calls a local mock provider to persist changes asynchronously (simulate with Future.delayed), and a Cancel button that discards edits.
+
+Also:
+- Add a navigation link/button labeled "Profile" at the bottom of lib/views/cart_screen.dart to push this screen.
+- Create a simple provider at lib/providers/profile_provider.dart with: Future<Profile> loadProfile(), Future<void> saveProfile(Profile). The provider may hold state in memory for now.
+- Ensure accessibility: semantic labels for all inputs and buttons; minimum recommended touch sizes.
+- Write widget tests at test/widget/profile_screen_test.dart that cover: view mode display, transition to edit mode, validation (invalid email), successful save calling provider, and Snackbar on save.
+- Keep UI simple and consistent with app styling. Do not implement backend authentication.
+
+Return the code changes (new files and modified cart_screen link) and the tests.
+```
