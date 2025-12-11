@@ -188,6 +188,32 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
+  // New helper to remove an item and offer undo via Snackbar.
+  void _removeItemWithUndo(BuildContext context, Sandwich sandwich) {
+    final int previousQty = widget.cart.getQuantity(sandwich);
+    if (previousQty == 0) return;
+
+    setState(() {
+      widget.cart.updateQuantity(sandwich, 0);
+    });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${sandwich.name} removed'),
+        duration: const Duration(seconds: 7),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            setState(() {
+              widget.cart.updateQuantity(sandwich, previousQty);
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -211,45 +237,75 @@ class _CartScreenState extends State<CartScreen> {
             children: [
               const SizedBox(height: 20),
               for (MapEntry<Sandwich, int> entry in widget.cart.items.entries)
-                Column(
-                  children: [
-                    Text(entry.key.name, style: heading2),
-                    Text(
-                      '${_getSizeText(entry.key.isFootlong)} on ${entry.key.breadType.name} bread',
-                      style: normalText,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Qty: ${entry.value} - £${_getItemPrice(entry.key, entry.value).toStringAsFixed(2)}',
-                          style: normalText,
-                        ),
-                        QuantityStepper(
-                          quantity: entry.value,
-                          min: 1,
-                          max: 99,
-                          onChanged: (newQuantity) async {
-                            setState(() {
-                              widget.cart
-                                  .updateItemQuantity(entry.key, newQuantity);
-                            });
-                          },
-                          // wire tap-to-edit to open modal dialog
-                          onEdit: (current) async {
-                            final int? edited = await showEditQuantityDialog(
-                              context,
-                              current: current,
-                              min: 1,
-                              max: 99,
-                            );
-                            return edited;
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                // Wrap each cart row in a Dismissible to enable swipe-to-delete.
+                Dismissible(
+                  key: ValueKey(entry.key),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    color: Colors.redAccent,
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
+                  onDismissed: (_) {
+                    _removeItemWithUndo(context, entry.key);
+                  },
+                  child: Column(
+                    children: [
+                      Text(entry.key.name, style: heading2),
+                      Text(
+                        '${_getSizeText(entry.key.isFootlong)} on ${entry.key.breadType.name} bread',
+                        style: normalText,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Qty: ${entry.value} - £${_getItemPrice(entry.key, entry.value).toStringAsFixed(2)}',
+                            style: normalText,
+                          ),
+                          // show stepper + trash button
+                          Row(
+                            children: [
+                              QuantityStepper(
+                                quantity: entry.value,
+                                min: 1,
+                                max: 99,
+                                onChanged: (newQuantity) async {
+                                  setState(() {
+                                    widget.cart.updateItemQuantity(
+                                        entry.key, newQuantity);
+                                  });
+                                },
+                                onEdit: (current) async {
+                                  final int? edited =
+                                      await showEditQuantityDialog(
+                                    context,
+                                    current: current,
+                                    min: 1,
+                                    max: 99,
+                                  );
+                                  return edited;
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              Semantics(
+                                label: 'Remove ${entry.key.name}',
+                                button: true,
+                                child: IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: 'Remove item',
+                                  onPressed: () =>
+                                      _removeItemWithUndo(context, entry.key),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
               Text(
                 'Total: £${widget.cart.totalPrice.toStringAsFixed(2)}',
