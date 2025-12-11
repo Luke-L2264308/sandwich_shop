@@ -5,6 +5,7 @@ import 'package:sandwich_shop/views/order_screen.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/repositories/pricing_repository.dart';
+import 'package:sandwich_shop/views/edit_quantity_dialog.dart'; // new import
 
 typedef QuantityChanged = Future<void> Function(int newQuantity);
 
@@ -14,6 +15,8 @@ class QuantityStepper extends StatefulWidget {
   final int max;
   final QuantityChanged onChanged;
   final String semanticPrefix;
+  // New: optional edit callback that should open an editor and return new value or null.
+  final Future<int?> Function(int current)? onEdit;
 
   const QuantityStepper({
     Key? key,
@@ -22,6 +25,7 @@ class QuantityStepper extends StatefulWidget {
     this.min = 1,
     this.max = 99,
     this.semanticPrefix = 'Quantity',
+    this.onEdit,
   }) : super(key: key);
 
   @override
@@ -110,7 +114,14 @@ class _QuantityStepperState extends State<QuantityStepper>
             liveRegion: true,
             child: GestureDetector(
               onTap: () async {
-                // Optional: caller may wire up tap-to-edit dialog
+                // If an edit callback is provided, call it and apply returned value.
+                if (widget.onEdit != null) {
+                  final int? edited = await widget.onEdit!(_quantity);
+                  if (edited != null && edited != _quantity) {
+                    await _setQuantity(edited);
+                  }
+                }
+                // Optional: otherwise do nothing (tap-to-edit not enabled)
               },
               child: Container(
                 padding:
@@ -223,6 +234,16 @@ class _CartScreenState extends State<CartScreen> {
                               widget.cart
                                   .updateItemQuantity(entry.key, newQuantity);
                             });
+                          },
+                          // wire tap-to-edit to open modal dialog
+                          onEdit: (current) async {
+                            final int? edited = await showEditQuantityDialog(
+                              context,
+                              current: current,
+                              min: 1,
+                              max: 99,
+                            );
+                            return edited;
                           },
                         ),
                       ],
