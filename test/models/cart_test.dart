@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
+import 'package:sandwich_shop/repositories/pricing_repository.dart';
 
 void main() {
   group('Cart', () {
@@ -116,6 +117,78 @@ void main() {
       cart.remove(sandwichA, quantity: 5);
       expect(cart.getQuantity(sandwichA), 0);
       expect(cart.isEmpty, isTrue);
+    });
+
+    test('adding two Sandwich instances with same config merges into one entry',
+        () {
+      final s1 = Sandwich(
+        type: SandwichType.veggieDelight,
+        isFootlong: false,
+        breadType: BreadType.white,
+      );
+      final s2 = Sandwich(
+        type: SandwichType.veggieDelight,
+        isFootlong: false,
+        breadType: BreadType.white,
+      );
+
+      cart.add(s1, quantity: 1);
+      cart.add(s2, quantity: 2);
+
+      expect(cart.length, 1,
+          reason: 'Equivalent sandwiches must merge into a single map entry');
+      expect(cart.countOfItems, 3);
+      expect(cart.getQuantity(s1), 3);
+    });
+
+    test('updateQuantity sets exact quantity and removes when set to 0', () {
+      final s = Sandwich(
+        type: SandwichType.chickenTeriyaki,
+        isFootlong: true,
+        breadType: BreadType.wheat,
+      );
+
+      cart.add(s, quantity: 2);
+      expect(cart.getQuantity(s), 2);
+
+      cart.updateQuantity(s, 5);
+      expect(cart.getQuantity(s), 5);
+
+      cart.updateQuantity(s, 0);
+      expect(cart.getQuantity(s), 0);
+      expect(cart.isEmpty, true);
+    });
+
+    test('remove decreases quantity or removes item when quantity goes to zero',
+        () {
+      final s = Sandwich(
+        type: SandwichType.veggieDelight,
+        isFootlong: false,
+        breadType: BreadType.white,
+      );
+
+      cart.add(s, quantity: 3);
+      cart.remove(s, quantity: 1);
+      expect(cart.getQuantity(s), 2);
+
+      cart.remove(s, quantity: 2);
+      expect(cart.getQuantity(s), 0);
+      expect(cart.isEmpty, true);
+    });
+
+    test('totalPrice uses PricingRepository calculation', () {
+      final repo = PricingRepository();
+
+      final s = Sandwich(
+        type: SandwichType.veggieDelight,
+        isFootlong: true,
+        breadType: BreadType.white,
+      );
+
+      cart.add(s, quantity: 3);
+      final expected =
+          repo.calculatePrice(quantity: 3, isFootlong: s.isFootlong);
+      expect(cart.totalPrice, expected);
     });
   });
 }
