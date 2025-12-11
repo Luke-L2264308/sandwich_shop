@@ -6,6 +6,9 @@ import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/repositories/pricing_repository.dart';
 import 'package:sandwich_shop/views/edit_quantity_dialog.dart'; // new import
+import 'package:provider/provider.dart';
+import '../providers/profile_provider.dart';
+import 'profile_screen.dart';
 
 typedef QuantityChanged = Future<void> Function(int newQuantity);
 
@@ -514,6 +517,28 @@ class _CartScreenState extends State<CartScreen> {
                 backgroundColor: Colors.grey,
               ),
               const SizedBox(height: 20),
+
+              // New: Profile navigation button
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Center(
+                  child: TextButton(
+                    key: const Key('profileNavButton'),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ChangeNotifierProvider.value(
+                            value: Provider.of<ProfileProvider>(context,
+                                listen: false),
+                            child: const ProfileScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('Profile'),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
