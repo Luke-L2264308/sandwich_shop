@@ -7,22 +7,37 @@ class Cart {
   // Returns a read-only copy of the items and their quantities
   Map<Sandwich, int> get items => Map.unmodifiable(_items);
 
+  // Helper: find an existing key in the map that is equivalent to the provided sandwich.
+  Sandwich? _findMatchingKey(Sandwich sandwich) {
+    for (final key in _items.keys) {
+      // Consider sandwiches equivalent if their identifying properties match.
+      // Adjust properties compared here if Sandwich has additional identity fields.
+      if (key.type == sandwich.type &&
+          key.isFootlong == sandwich.isFootlong &&
+          key.breadType == sandwich.breadType) {
+        return key;
+      }
+    }
+    return null;
+  }
+
   void add(Sandwich sandwich, {int quantity = 1}) {
-    if (_items.containsKey(sandwich)) {
-      _items[sandwich] = _items[sandwich]! + quantity;
+    final Sandwich? matching = _findMatchingKey(sandwich);
+    if (matching != null) {
+      _items[matching] = _items[matching]! + quantity;
     } else {
       _items[sandwich] = quantity;
     }
   }
 
   void remove(Sandwich sandwich, {int quantity = 1}) {
-    if (_items.containsKey(sandwich)) {
-      final currentQty = _items[sandwich]!;
-      if (currentQty > quantity) {
-        _items[sandwich] = currentQty - quantity;
-      } else {
-        _items.remove(sandwich);
-      }
+    final Sandwich? matching = _findMatchingKey(sandwich);
+    if (matching == null) return;
+    final currentQty = _items[matching]!;
+    if (currentQty > quantity) {
+      _items[matching] = currentQty - quantity;
+    } else {
+      _items.remove(matching);
     }
   }
 
@@ -58,8 +73,9 @@ class Cart {
   }
 
   int getQuantity(Sandwich sandwich) {
-    if (_items.containsKey(sandwich)) {
-      return _items[sandwich]!;
+    final Sandwich? matching = _findMatchingKey(sandwich);
+    if (matching != null) {
+      return _items[matching]!;
     }
     return 0;
   }
@@ -69,12 +85,19 @@ class Cart {
   // - If the item exists it's updated, otherwise it's added when newQuantity > 0.
   // This is atomic from the caller perspective (single method to set/remove).
   void updateQuantity(Sandwich sandwich, int newQuantity) {
-    int q = newQuantity;
-    if (q <= 0) {
-      _items.remove(sandwich);
-      return;
+    final Sandwich? matching = _findMatchingKey(sandwich);
+    final int q = newQuantity;
+    if (matching != null) {
+      if (q <= 0) {
+        _items.remove(matching);
+      } else {
+        _items[matching] = q;
+      }
+    } else {
+      if (q > 0) {
+        _items[sandwich] = q;
+      }
     }
-    _items[sandwich] = q;
   }
 
   // Compatibility alias: some code expects updateItemQuantity.
