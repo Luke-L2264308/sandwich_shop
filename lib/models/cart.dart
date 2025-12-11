@@ -63,4 +63,22 @@ class Cart {
     }
     return 0;
   }
+
+  // New: set an exact quantity for a sandwich.
+  // - If newQuantity <= 0 the item is removed from the cart.
+  // - If the item exists it's updated, otherwise it's added when newQuantity > 0.
+  // This is atomic from the caller perspective (single method to set/remove).
+  void updateQuantity(Sandwich sandwich, int newQuantity) {
+    int q = newQuantity;
+    if (q <= 0) {
+      _items.remove(sandwich);
+      return;
+    }
+    _items[sandwich] = q;
+  }
+
+  // Compatibility alias: some code expects updateItemQuantity.
+  void updateItemQuantity(Sandwich sandwich, int newQuantity) {
+    updateQuantity(sandwich, newQuantity);
+  }
 }
