@@ -7,6 +7,7 @@ import 'package:sandwich_shop/models/sandwich.dart';
 import 'package:sandwich_shop/repositories/pricing_repository.dart';
 import 'package:sandwich_shop/views/edit_quantity_dialog.dart'; // new import
 import 'package:provider/provider.dart';
+import 'package:sandwich_shop/state/navigation_provider.dart';
 import '../providers/profile_provider.dart';
 import 'profile_screen.dart';
 
@@ -367,13 +368,21 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 100,
-            child: Image.asset('assets/images/logo.png'),
-          ),
-        ),
+        leading: MediaQuery.of(context).size.width < 1024
+            ? IconButton(
+                icon: const Icon(Icons.menu),
+                tooltip: 'Open navigation',
+                onPressed: () =>
+                    Provider.of<NavigationProvider>(context, listen: false)
+                        .openDrawer(),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  height: 100,
+                  child: Image.asset('assets/images/logo.png'),
+                ),
+              ),
         title: const Text(
           'Cart View',
           style: heading1,

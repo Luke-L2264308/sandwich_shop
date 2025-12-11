@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sandwich_shop/state/navigation_provider.dart';
 import '../providers/profile_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -89,7 +90,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, provider, _) {
         final profile = provider.profile;
         return Scaffold(
-          appBar: AppBar(title: const Text('Profile')),
+          appBar: AppBar(
+            title: const Text('Profile'),
+            leading: MediaQuery.of(context).size.width < 1024
+                ? IconButton(
+                    icon: const Icon(Icons.menu),
+                    tooltip: 'Open navigation',
+                    onPressed: () =>
+                        Provider.of<NavigationProvider>(context, listen: false)
+                            .openDrawer(),
+                  )
+                : null,
+          ),
           body: Padding(
             padding: const EdgeInsets.all(16.0),
             child: _editMode
