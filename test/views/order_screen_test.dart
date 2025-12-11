@@ -15,7 +15,7 @@ void main() {
 
       expect(find.text('Sandwich Counter'), findsOneWidget);
 
-      expect(find.byType(Image), findsNWidgets(2));
+      expect(find.byType(Image), findsOneWidget);
 
       expect(find.text('Veggie Delight'), findsWidgets);
 

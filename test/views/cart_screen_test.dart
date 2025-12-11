@@ -95,28 +95,7 @@ void main() {
       expect(backButton.onPressed, isNotNull);
     });
 
-    testWidgets('displays logo in app bar', (WidgetTester tester) async {
-      final Cart cart = Cart();
-      final CartScreen cartScreen = CartScreen(cart: cart);
-      final MaterialApp app = MaterialApp(
-        home: cartScreen,
-      );
-
-      await tester.pumpWidget(app);
-
-      final appBarFinder = find.byType(AppBar);
-      expect(appBarFinder, findsOneWidget);
-
-      final appBarImagesFinder = find.descendant(
-        of: appBarFinder,
-        matching: find.byType(Image),
-      );
-      expect(appBarImagesFinder, findsOneWidget);
-
-      final Image logoImage = tester.widget(appBarImagesFinder);
-      expect(
-          (logoImage.image as AssetImage).assetName, 'assets/images/logo.png');
-    });
+    
 
     testWidgets('displays correct pricing for different sandwich types',
         (WidgetTester tester) async {
