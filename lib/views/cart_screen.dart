@@ -214,6 +214,152 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
+  // New: cached snapshot used for undo operations
+  Map<Sandwich, int>? _undoSnapshot;
+
+  // New: Confirmation before clearing cart
+  Future<void> _confirmClearCart(BuildContext context) async {
+    final bool? ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear cart'),
+        content: const Text('Are you sure you want to clear your entire cart?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel')),
+          ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Clear')),
+        ],
+      ),
+    );
+    if (ok == true) {
+      _clearCartWithUndo(context);
+    }
+  }
+
+  // New: clear cart and show undo snackbar
+  void _clearCartWithUndo(BuildContext context) {
+    // cache snapshot
+    _undoSnapshot = Map<Sandwich, int>.from(widget.cart.items);
+    setState(() {
+      widget.cart.clear();
+    });
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Cart cleared'),
+        duration: const Duration(seconds: 7),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            if (_undoSnapshot != null) {
+              setState(() {
+                widget.cart.clear();
+                _undoSnapshot!.forEach((sandwich, qty) {
+                  widget.cart.updateQuantity(sandwich, qty);
+                });
+                _undoSnapshot = null;
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  // New: Bulk update dialog and apply logic
+  Future<void> _showBulkUpdateDialog(BuildContext context) async {
+    final TextEditingController controller = TextEditingController(text: '1');
+    String? errorText;
+    final int globalMin = 1;
+    final int globalMax = 99;
+
+    final int? result = await showDialog<int>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(builder: (ctx, setStateDialog) {
+          void submit() {
+            final text = controller.text.trim();
+            final parsed = int.tryParse(text);
+            if (parsed == null) {
+              setStateDialog(() => errorText = 'Enter a valid integer');
+              return;
+            }
+            if (parsed < globalMin || parsed > globalMax) {
+              setStateDialog(() => errorText =
+                  'Enter a value between $globalMin and $globalMax');
+              return;
+            }
+            Navigator.of(ctx).pop(parsed);
+          }
+
+          return AlertDialog(
+            title: const Text('Bulk update quantities'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                      labelText: 'Set quantity for all items',
+                      errorText: errorText),
+                  onSubmitted: (_) => submit(),
+                ),
+                const SizedBox(height: 8),
+                Text('Values will be clamped between $globalMin and $globalMax',
+                    style: Theme.of(ctx).textTheme.bodySmall),
+              ],
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(null),
+                  child: const Text('Cancel')),
+              ElevatedButton(onPressed: submit, child: const Text('Apply')),
+            ],
+          );
+        });
+      },
+    );
+
+    if (result != null) {
+      // apply bulk update with undo snapshot
+      _undoSnapshot = Map<Sandwich, int>.from(widget.cart.items);
+      setState(() {
+        widget.cart.items.forEach((sandwich, _) {
+          final int clamped = result.clamp(globalMin, globalMax);
+          widget.cart.updateQuantity(sandwich, clamped);
+        });
+      });
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('All items set to $result'),
+          duration: const Duration(seconds: 7),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              if (_undoSnapshot != null) {
+                setState(() {
+                  widget.cart.clear();
+                  _undoSnapshot!.forEach((sandwich, qty) {
+                    widget.cart.updateQuantity(sandwich, qty);
+                  });
+                  _undoSnapshot = null;
+                });
+              }
+            },
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -313,6 +459,37 @@ class _CartScreenState extends State<CartScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
+
+              // New: Clear Cart and Bulk Update controls
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: widget.cart.isEmpty
+                            ? null
+                            : () => _confirmClearCart(context),
+                        icon: const Icon(Icons.delete_forever),
+                        label: const Text('Clear Cart'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: widget.cart.isEmpty
+                            ? null
+                            : () => _showBulkUpdateDialog(context),
+                        icon: const Icon(Icons.format_list_numbered),
+                        label: const Text('Bulk Update'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
               StyledButton(
                 onPressed: _goBack,
                 icon: Icons.arrow_back,

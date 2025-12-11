@@ -61,42 +61,8 @@ Allow users to modify items in their cart (quantity, options, remove, save for l
 
 ---
 
-### Subtask 4 — Edit Item Options (Customize Sandwich)
-- Description
-  - Edit button opens an Edit Item screen pre-filled with the cart item to change bread, toppings, size, etc.
-- User stories
-  - As a shopper, I edit item options for a cart row to change my sandwich configuration.
-  - As a shopper, if edited configuration duplicates an existing cart item, the app merges quantities (or prompts).
-- Acceptance criteria
-  - Edit screen pre-fills current options; upon Save, item price is recalculated and cart subtotal/total update immediately.
-  - Provider method editItemOptions(cartItemId, CartItemOptions) is called; on success persist and animate changes.
-  - If edited item matches another cart item (same options), either merge automatically (sum quantities) or prompt user; merging occurs correctly.
-  - Tests cover price recalculation, persistence, and merge logic.
-- Tasks
-  - Create lib/views/edit_cart_item.dart (edit screen).
-  - Add provider method: Future<void> editItemOptions(String cartItemId, CartItemOptions options).
-  - Implement CartItemOptions model (lib/models/cart_item.dart or options file) and price calculation helper.
 
----
-
-### Subtask 5 — Save for Later / Wishlist
-- Description
-  - Move items from cart to a Saved-for-Later list and back.
-- User stories
-  - As a shopper, I can save an item for later and remove it from my cart.
-  - As a shopper, I can move an item from Saved back into the cart; the app enforces stock and maxQuantity.
-- Acceptance criteria
-  - Move action removes item from cart, updates totals, and adds to saved list in state.
-  - Saved list item can be returned to cart; if returning would exceed limits, app prompts to adjust quantity.
-  - Provider method moveToSaved(cartItemId) exists and persists state.
-  - Tests cover move-to-saved and restore flows including quantity limit handling.
-- Tasks
-  - Implement Saved-for-Later storage in provider; UI actions in cart_screen and a Saved list view.
-  - Add provider method: Future<void> moveToSaved(String cartItemId).
-
----
-
-### Subtask 6 — Clear Cart and Bulk Updates
+### Subtask 4 — Clear Cart and Bulk Updates
 - Description
   - Provide Clear Cart (with confirmation + undo) and Bulk Update quantities.
 - User stories
