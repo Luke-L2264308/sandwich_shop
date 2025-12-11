@@ -183,3 +183,47 @@ Also:
 
 Return the code changes (new files and modified cart_screen link) and the tests.
 ```
+
+---
+
+## New task: App-wide Drawer + Responsive Navigation
+
+Short description
+- Provide a single, accessible app-wide navigation shell that exposes a Drawer on small screens, a NavigationRail on medium screens, and a permanent side navigation on large screens. Make the drawer (or rail/panel) available from all app screens via a shared scaffold/shell.
+
+Exact expected behavior when user acts
+- On narrow screens (mobile):
+  - AppBar shows hamburger icon.
+  - Tap hamburger opens modal Drawer with navigation items and account actions.
+  - Drawer items navigate to screens; Drawer closes automatically after navigation.
+  - Drawer accessible via keyboard (semanticLabel on the button) and swipe.
+- On medium screens (tablet):
+  - A persistent, collapsible NavigationRail appears on the left.
+  - Selecting an item navigates without opening a modal Drawer.
+  - Rail has icons and optional labels when expanded.
+- On wide screens (desktop):
+  - A permanent side navigation panel is visible with icons + text.
+  - The AppBar does not show a hamburger icon for navigation.
+- All navigation items share a single source of truth and update selection state consistently.
+- All navigation UIs have semantic labels, accessible touch targets, and keyboard focus behavior.
+
+Implementation notes / constraints
+- Create a single AppShell widget (lib/widgets/app_shell.dart) that accepts a Widget body and handles drawer/rail/panel rendering based on screen width.
+- Replace per-screen Scaffold usage with AppShell(body: MyScreen()) for all top-level screens.
+- Use LayoutBuilder or MediaQuery to determine layout breakpoints and AnimatedSwitcher for smooth transitions.
+- Centralize navigation items in lib/navigation/navigation_items.dart and use a NavigationProvider (Provider or Riverpod) to manage selection and open/close state.
+- Preserve existing routes and ensure deep linking works.
+
+Deliverables
+- Widget: lib/widgets/app_shell.dart (BaseScaffold implementation).
+- Navigation config: lib/navigation/navigation_items.dart.
+- Provider/state: lib/state/navigation_provider.dart (selection, open/close).
+- Updates to top-level screens to use AppShell.
+- Unit/widget tests:
+  - Widget test: AppShell renders Drawer on narrow width and NavigationRail on medium width and side panel on large width.
+  - Interaction test: tap hamburger opens drawer; selecting item navigates and closes drawer.
+  - Accessibility test: semantic labels exist for open/close actions.
+- Brief manual QA steps (incremental): open Drawer, navigate, resize window and confirm UI switches, keyboard open/close, verify deep link navigation.
+
+Reference
+- Revisit Worksheet 2, Exercise 6 for adaptive layout hints.
