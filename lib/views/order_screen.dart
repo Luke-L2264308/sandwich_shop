@@ -5,6 +5,7 @@ import 'package:sandwich_shop/views/app_styles.dart';
 import 'package:sandwich_shop/views/cart_screen.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
+import 'package:sandwich_shop/views/common_widgets.dart';
 import 'package:sandwich_shop/views/profile_screen.dart';
 import 'settings_screen.dart';
 class OrderScreen extends StatefulWidget {
@@ -162,36 +163,7 @@ class _OrderScreenState extends State<OrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: SizedBox(
-            height: 100,
-            child: Image.asset('assets/images/logo.png'),
-          ),
-        ),
-        title: Text(
-          'Sandwich Counter',
-          style: heading1,
-        ),
-        actions: [
-          Consumer<Cart>(
-            builder: (context, cart, child) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.shopping_cart),
-                    const SizedBox(width: 4),
-                    Text('${cart.countOfItems}'),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: titleAppbar('Sandwich Counter', actions: shoppingCartDisplay()),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -227,6 +199,7 @@ class _OrderScreenState extends State<OrderScreen> {
               ),
               const SizedBox(height: 20),
               Row(
+                
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text('Six-inch', style: normalText),
