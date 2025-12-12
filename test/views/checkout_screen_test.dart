@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sandwich_shop/views/checkout_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
+import 'package:sandwich_shop/views/checkout_screen.dart';
 
 void main() {
   group('CheckoutScreen', () {
     testWidgets('displays order summary with empty cart',
         (WidgetTester tester) async {
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => Cart(),
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('Checkout'), findsOneWidget);
       expect(find.text('Order Summary'), findsOneWidget);
@@ -30,10 +35,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 2);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('Order Summary'), findsOneWidget);
       expect(find.text('2x Veggie Delight'), findsOneWidget);
@@ -57,10 +66,14 @@ void main() {
       cart.add(sandwich1, quantity: 1);
       cart.add(sandwich2, quantity: 3);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('1x Veggie Delight'), findsOneWidget);
       expect(find.text('3x Chicken Teriyaki'), findsOneWidget);
@@ -69,10 +82,14 @@ void main() {
 
     testWidgets('shows confirm payment button initially',
         (WidgetTester tester) async {
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => Cart(),
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('Confirm Payment'), findsOneWidget);
       expect(find.byType(ElevatedButton), findsOneWidget);
@@ -90,10 +107,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 1);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       final Finder confirmButtonFinder = find.text('Confirm Payment');
       await tester.tap(confirmButtonFinder);
@@ -116,10 +137,14 @@ void main() {
       );
       cart.add(footlongSandwich, quantity: 1);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('1x Veggie Delight'), findsOneWidget);
       expect(find.textContaining('£11.00'), findsWidgets);
@@ -135,10 +160,14 @@ void main() {
       );
       cart.add(sixInchSandwich, quantity: 1);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('1x Veggie Delight'), findsOneWidget);
       expect(find.textContaining('£7.00'), findsWidgets);
@@ -160,10 +189,14 @@ void main() {
       cart.add(footlongSandwich, quantity: 1);
       cart.add(sixInchSandwich, quantity: 2);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('1x Veggie Delight'), findsOneWidget);
       expect(find.text('2x Chicken Teriyaki'), findsOneWidget);
@@ -171,10 +204,14 @@ void main() {
     });
 
     testWidgets('has proper layout structure', (WidgetTester tester) async {
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => Cart(),
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.byType(Scaffold), findsOneWidget);
       expect(find.byType(AppBar), findsOneWidget);
@@ -184,10 +221,14 @@ void main() {
 
     testWidgets('payment method text is displayed correctly',
         (WidgetTester tester) async {
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => Cart(),
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       final Finder paymentMethodFinder =
           find.text('Payment Method: Card ending in 1234');
@@ -207,10 +248,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 1);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       final Finder rowFinders = find.byType(Row);
       expect(rowFinders, findsWidgets);
@@ -232,10 +277,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 1);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.byType(Divider), findsOneWidget);
     });
@@ -250,10 +299,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 3);
 
-      const CheckoutScreen checkoutScreen = CheckoutScreen();
-      const MaterialApp app = MaterialApp(home: checkoutScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider<Cart>(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CheckoutScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('3x Chicken Teriyaki'), findsOneWidget);
     });
