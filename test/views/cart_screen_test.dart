@@ -4,15 +4,20 @@ import 'package:sandwich_shop/views/cart_screen.dart';
 import 'package:sandwich_shop/views/order_screen.dart';
 import 'package:sandwich_shop/models/cart.dart';
 import 'package:sandwich_shop/models/sandwich.dart';
-
+import 'package:provider/provider.dart';
 void main() {
   group('CartScreen', () {
     testWidgets('displays empty cart message when cart is empty',
         (WidgetTester tester) async {
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => Cart(),
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
+      
 
       expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Your cart is empty.'), findsOneWidget);
@@ -29,10 +34,15 @@ void main() {
       );
       cart.add(sandwich, quantity: 2);
 
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
+      
 
       expect(find.text('Cart View'), findsOneWidget);
       expect(find.text('Veggie Delight'), findsOneWidget);
@@ -58,10 +68,15 @@ void main() {
       cart.add(sandwich1, quantity: 1);
       cart.add(sandwich2, quantity: 3);
 
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+     await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
+      
 
       expect(find.text('Veggie Delight'), findsOneWidget);
       expect(find.text('Chicken Teriyaki'), findsOneWidget);
@@ -82,20 +97,28 @@ void main() {
       );
       cart.add(sandwich, quantity: 1);
 
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
 
       expect(find.widgetWithText(StyledButton, 'Checkout'), findsOneWidget);
     });
 
     testWidgets('hides checkout button when cart is empty',
         (WidgetTester tester) async {
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => Cart(),
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
 
       expect(find.widgetWithText(StyledButton, 'Checkout'), findsNothing);
     });
@@ -110,10 +133,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 1);
 
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('Qty: 1'), findsOneWidget);
 
@@ -135,10 +162,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 2);
 
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('Qty: 2'), findsOneWidget);
 
@@ -160,10 +191,14 @@ void main() {
       );
       cart.add(sandwich, quantity: 2);
 
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => cart,
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
 
       expect(find.text('Veggie Delight'), findsOneWidget);
 
@@ -177,10 +212,14 @@ void main() {
     });
 
     testWidgets('back button navigates back', (WidgetTester tester) async {
-      const CartScreen cartViewScreen = CartScreen();
-      const MaterialApp app = MaterialApp(home: cartViewScreen);
-
-      await tester.pumpWidget(app);
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (context) => Cart(),
+          child: const MaterialApp(
+            home: CartScreen(),
+          ),
+        ),
+      );
 
       final Finder backButtonFinder =
           find.widgetWithText(StyledButton, 'Back to Order');
