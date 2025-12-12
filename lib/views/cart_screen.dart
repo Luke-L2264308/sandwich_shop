@@ -114,7 +114,7 @@ class _CartScreenState extends State<CartScreen> {
             child: Image.asset('assets/images/logo.png'),
           ),
         ),
-        title: const Text(
+        title: Text(
           'Cart View',
           style: heading1,
         ),
@@ -145,7 +145,7 @@ class _CartScreenState extends State<CartScreen> {
                 children: [
                   const SizedBox(height: 20),
                   if (cart.items.isEmpty)
-                    const Text(
+                    Text(
                       'Your cart is empty.',
                       style: heading2,
                       textAlign: TextAlign.center,
