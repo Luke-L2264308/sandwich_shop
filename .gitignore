@@ -46,3 +46,17 @@ app.*.map.json
 
 # Kiro
 .kiro/
+firebase.json
+pubspec.lock
+android/settings.gradle.kts
+android/app/build.gradle.kts
+android/app/google-services.json
+lib/firebase_options.dart
+macos/Flutter/GeneratedPluginRegistrant.swift
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
+android/settings.gradle.kts
+android/app/build.gradle.kts
+macos/Flutter/GeneratedPluginRegistrant.swift
+windows/flutter/generated_plugin_registrant.cc
+windows/flutter/generated_plugins.cmake
