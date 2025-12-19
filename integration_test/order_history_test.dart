@@ -220,5 +220,94 @@ void main() {
       final orders = await dbService2.getOrders();
       expect(orders.isNotEmpty, isTrue);
     });
+
+    testWidgets('cart edge cases: rapid add taps', (WidgetTester tester) async {
+      // Ensure a clean DB
+      try {
+        await DatabaseService().reset();
+      } catch (_) {}
+      final String databasesPath = await getDatabasesPath();
+      final String dbPath = join(databasesPath, 'sandwich_shop.db');
+      await deleteDatabase(dbPath);
+
+      app.main();
+      await tester.pumpAndSettle();
+
+      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
+      await waitForFinder(tester, addToCartButton);
+      await tester.ensureVisible(addToCartButton);
+
+      // Rapidly tap Add to Cart 3 times
+      await tester.tap(addToCartButton);
+      await tester.tap(addToCartButton);
+      await tester.tap(addToCartButton);
+      await tester.pumpAndSettle();
+
+      // Expect 3 items in cart
+      expect(find.text('Cart: 3 items - £33.00'), findsOneWidget);
+    });
+
+    testWidgets('cart edge cases: zero quantity prevents adding',
+        (WidgetTester tester) async {
+      // Ensure a clean DB
+      try {
+        await DatabaseService().reset();
+      } catch (_) {}
+      final String databasesPath = await getDatabasesPath();
+      final String dbPath = join(databasesPath, 'sandwich_shop.db');
+      await deleteDatabase(dbPath);
+
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Decrease quantity to zero
+      final removeButtons = find.byIcon(Icons.remove);
+      await waitForFinder(tester, removeButtons);
+      final removeButton = removeButtons.first;
+      await tester.ensureVisible(removeButton);
+      await tester.tap(removeButton); // from 1 -> 0
+      await tester.pumpAndSettle();
+
+      // Capture cart summary before attempting Add
+      expect(find.text('Cart: 0 items - £0.00'), findsOneWidget);
+
+      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
+      await waitForFinder(tester, addToCartButton);
+      await tester.ensureVisible(addToCartButton);
+
+      // Attempt to add with quantity 0
+      await tester.tap(addToCartButton);
+      await tester.pumpAndSettle();
+
+      // Cart should remain unchanged
+      expect(find.text('Cart: 0 items - £0.00'), findsOneWidget);
+    });
+
+    testWidgets('cart edge cases: rapid quantity increments',
+        (WidgetTester tester) async {
+      // Ensure a clean DB
+      try {
+        await DatabaseService().reset();
+      } catch (_) {}
+      final String databasesPath = await getDatabasesPath();
+      final String dbPath = join(databasesPath, 'sandwich_shop.db');
+      await deleteDatabase(dbPath);
+
+      app.main();
+      await tester.pumpAndSettle();
+
+      final addButtons = find.byIcon(Icons.add);
+      await waitForFinder(tester, addButtons);
+      final quantityAddButton = addButtons.first;
+      await tester.ensureVisible(quantityAddButton);
+
+      // Rapidly tap + 6 times (starting at 1 => expect 7)
+      for (int i = 0; i < 6; i++) {
+        await tester.tap(quantityAddButton);
+      }
+      await tester.pumpAndSettle();
+
+      expect(find.text('7'), findsOneWidget);
+    });
   });
 }
