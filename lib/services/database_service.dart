@@ -6,6 +6,10 @@ import 'package:sandwich_shop/models/saved_order.dart';
 class DatabaseService {
   static Database? _database;
 
+  /// Test-only flag. When true, the next call to `insertOrder` will
+  /// throw an exception to simulate a database failure.
+  static bool simulateInsertFailure = false;
+
   /// Close and clear the cached database instance. Useful for tests
   /// to ensure the database is reopened and onCreate/onUpgrade handlers
   /// run after the file was deleted.
@@ -47,6 +51,11 @@ class DatabaseService {
   }
 
   Future<void> insertOrder(SavedOrder order) async {
+    if (simulateInsertFailure) {
+      // reset the flag so only the next insert fails
+      simulateInsertFailure = false;
+      throw Exception('simulated insert failure');
+    }
     final Database db = await database;
     await db.insert('orders', order.toMap());
   }

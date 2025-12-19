@@ -43,11 +43,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       await databaseService.insertOrder(savedOrder);
     } catch (e, st) {
-      // If DB insert fails, reset processing state and show an error.
+      // If DB insert fails, reset processing state and show a generic error.
       if (mounted) {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save order: $e')),
+          const SnackBar(content: Text('Failed to save order')),
         );
       }
       return;

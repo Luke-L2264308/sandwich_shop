@@ -158,5 +158,67 @@ void main() {
       expect(
           find.widgetWithText(StyledButton, 'Back to Order'), findsOneWidget);
     });
+
+    testWidgets('checkout failure and recovery', (WidgetTester tester) async {
+      // Ensure a clean database
+      final String databasesPath = await getDatabasesPath();
+      final String dbPath = join(databasesPath, 'sandwich_shop.db');
+      try {
+        await DatabaseService().reset();
+      } catch (_) {}
+      await deleteDatabase(dbPath);
+
+      // Launch app and go to checkout with one item
+      app.main();
+      await tester.pumpAndSettle();
+
+      final addToCartButton = find.widgetWithText(StyledButton, 'Add to Cart');
+      await waitForFinder(tester, addToCartButton);
+      await tester.ensureVisible(addToCartButton);
+      await tester.tap(addToCartButton);
+      await tester.pumpAndSettle();
+
+      final viewCartButton = find.widgetWithText(StyledButton, 'View Cart');
+      await waitForFinder(tester, viewCartButton);
+      await tester.ensureVisible(viewCartButton);
+      await tester.tap(viewCartButton);
+      await tester.pumpAndSettle();
+
+      final checkoutButton = find.widgetWithText(StyledButton, 'Checkout');
+      await waitForFinder(tester, checkoutButton);
+      await tester.ensureVisible(checkoutButton);
+      await tester.tap(checkoutButton);
+      await tester.pumpAndSettle();
+
+      // Simulate DB insert failure for the next insert
+      DatabaseService.simulateInsertFailure = true;
+
+      final confirmPaymentButton = find.text('Confirm Payment');
+      await waitForFinder(tester, confirmPaymentButton);
+      await tester.ensureVisible(confirmPaymentButton);
+      await tester.tap(confirmPaymentButton);
+      await tester.pumpAndSettle();
+
+      // Wait for processing + buffer
+      await tester.pump(const Duration(seconds: 3));
+
+      // Expect an error SnackBar shown and still on Checkout screen
+      expect(find.text('Failed to save order'), findsOneWidget);
+      expect(find.text('Checkout'), findsOneWidget);
+
+      // Now clear the simulate flag and retry, should succeed
+      DatabaseService.simulateInsertFailure = false;
+      await tester.tap(confirmPaymentButton);
+      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 3));
+
+      // After successful retry we should be back on main order screen
+      expect(find.text('Sandwich Counter'), findsOneWidget);
+
+      // DB should now contain the saved order
+      final DatabaseService dbService2 = DatabaseService();
+      final orders = await dbService2.getOrders();
+      expect(orders.isNotEmpty, isTrue);
+    });
   });
 }
