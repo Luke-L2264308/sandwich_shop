@@ -6,6 +6,20 @@ import 'package:sandwich_shop/models/saved_order.dart';
 class DatabaseService {
   static Database? _database;
 
+  /// Close and clear the cached database instance. Useful for tests
+  /// to ensure the database is reopened and onCreate/onUpgrade handlers
+  /// run after the file was deleted.
+  Future<void> reset() async {
+    if (_database != null) {
+      try {
+        await _database!.close();
+      } catch (_) {
+        // ignore errors when closing
+      }
+      _database = null;
+    }
+  }
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();

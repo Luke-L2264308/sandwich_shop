@@ -40,7 +40,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
 
     final DatabaseService databaseService = DatabaseService();
-    await databaseService.insertOrder(savedOrder);
+    try {
+      await databaseService.insertOrder(savedOrder);
+    } catch (e, st) {
+      // If DB insert fails, reset processing state and show an error.
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save order: $e')),
+        );
+      }
+      return;
+    }
 
     final Map orderConfirmation = {
       'orderId': orderId,
